@@ -3,6 +3,9 @@ const INDEX_URL = BASE_URL + '/api/movies/'
 const POSTER_URL = BASE_URL + '/posters/'
 const movies = []
 const dataPanel = document.querySelector('#data-panel')
+const searchForm = document.querySelector('#search-form')
+const searchInput = document.querySelector('#search-input')
+
 function renderMovieList(data) {
   let rawHTML = ''
 
@@ -26,7 +29,6 @@ function renderMovieList(data) {
     `
   })
   // processing
-
   dataPanel.innerHTML = rawHTML
 }
 function showMovieModal(id) {
@@ -44,24 +46,30 @@ function showMovieModal(id) {
     modalImage.innerHTML = `
     <img src="${POSTER_URL + data.image}" alt="movie-poster" class="image-fluid">`
   })
-
 }
-
+function onSearchFormSubmitted(event) {
+  event.preventDefault()
+  const keywords = searchInput.value.trim().toLowerCase()
+  let filteredMovie = []
+  // Use filter() to filter the movie lists based on input keyword
+  filteredMovie = movies.filter(movie => movie.title.toLowerCase().includes(keywords))
+  if (filteredMovie.length == 0) {
+    alert('Cannot find the movies based on keywords: ' + keywords)
+  } 
+  renderMovieList(filteredMovie)
+}
+// Show more info regarding clicked movie
 dataPanel.addEventListener('click', function onPanelClicked(event) {
-  
   if (event.target.matches('.btn-show-movie')){
-    console.log(event.target.dataset)
     showMovieModal(Number(event.target.dataset.id))
   }  
 })
+// Search feature
+searchForm.addEventListener('click', onSearchFormSubmitted)
 
+// Send HTTP GET request and get the response through API
 axios.get(INDEX_URL).then((response) => {
-  //Array(80)
-  // console.log(response.data.results)
-  // for (const movie of response.data.results) {
-  //   movies.push(movie)
-  // }
+  // use spread operator (...) instead of for-of method
   movies.push(...response.data.results)
-  console.log(movies)
   renderMovieList(movies)
 })
