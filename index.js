@@ -55,8 +55,10 @@ function onSearchFormSubmitted(event) {
   filteredMovie = movies.filter(movie => movie.title.toLowerCase().includes(keywords))
   if (filteredMovie.length == 0) {
     alert('Cannot find the movies based on keywords: ' + keywords)
-  } 
-  renderMovieList(filteredMovie)
+    renderMovieList(movies)
+  } else {
+    renderMovieList(filteredMovie)
+  }
 }
 // Show more info regarding clicked movie
 dataPanel.addEventListener('click', function onPanelClicked(event) {
