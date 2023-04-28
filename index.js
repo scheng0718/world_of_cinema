@@ -118,7 +118,7 @@ dataPanel.addEventListener('click', panelClicked)
 paginator.addEventListener('click', paginatorClicked)
 // Search feature
 searchForm.addEventListener('click', searchFormSubmitted)
-// TODO:search based on input 
+// TODO: pagination for favorite page 
 
 // Send HTTP GET request and get the response through API
 axios.get(INDEX_URL)
