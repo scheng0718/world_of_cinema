@@ -1,10 +1,26 @@
 const BASE_URL = 'https://webdev.alphacamp.io'
 const INDEX_URL = BASE_URL + '/api/movies/'
 const POSTER_URL = BASE_URL + '/posters/'
+const MOVIES_PER_PAGE = 12
+
 const movies = []
+let filteredMovies = []
+
 const dataPanel = document.querySelector('#data-panel')
 const searchForm = document.querySelector('#search-form')
 const searchInput = document.querySelector('#search-input')
+const paginator = document.querySelector('#paginator')
+
+// Render paginator based on movies list
+function renderPaginator(amount) {
+  const numberOfPages = Math.ceil(amount / MOVIES_PER_PAGE)
+  let rawHTML = ''
+
+  for (let page = 1; page <= numberOfPages; page++) {
+    rawHTML += `<li class="page-item"><a class="page-link" href="#" data-page=${page}>${page}</a></li>`
+  }
+  paginator.innerHTML = rawHTML
+}
 
 function renderMovieList(data) {
   let rawHTML = ''
@@ -31,6 +47,15 @@ function renderMovieList(data) {
   // processing
   dataPanel.innerHTML = rawHTML
 }
+// Determine how many data will be displayed by each page
+function getMoviesByPages(page) {
+  //page 1-> 0-11, page2 -> 12-23, page3-> 24-35
+  // movies ? 'movies' ? "filteredMovies" considering either movies or filteredMovies
+  const data = filteredMovies.length ? filteredMovies : movies
+  const startIndex = (page - 1) * MOVIES_PER_PAGE
+  return data.slice(startIndex, startIndex + MOVIES_PER_PAGE)
+}
+
 function showMovieModal(id) {
   const modalTitle = document.querySelector('#movie-modal-title')
   const modalImage = document.querySelector('#movie-modal-image')
@@ -47,19 +72,34 @@ function showMovieModal(id) {
     <img src="${POSTER_URL + data.image}" alt="movie-poster" class="image-fluid">`
   })
 }
-function onSearchFormSubmitted(event) {
+function searchFormSubmitted(event) {
   event.preventDefault()
   const keywords = searchInput.value.trim().toLowerCase()
-  let filteredMovie = []
+  
   // Use filter() to filter the movie lists based on input keyword
-  filteredMovie = movies.filter(movie => movie.title.toLowerCase().includes(keywords))
-  if (filteredMovie.length == 0) {
+  filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(keywords))
+  if (filteredMovies.length === 0) {
     alert('Cannot find the movies based on keywords: ' + keywords)
     renderMovieList(movies)
   } else {
-    renderMovieList(filteredMovie)
+    renderPaginator(filteredMovies.length)
+    renderMovieList(getMoviesByPages(1))
   }
 }
+function paginatorClicked(event) {
+  if (event.target.tagName !== 'A') return 
+  const page = Number(event.target.dataset.page)
+  // console.log(event.target.dataset.page) 
+  renderMovieList(getMoviesByPages(page))
+}
+function panelClicked(event) {
+  if (event.target.matches('.btn-show-movie')){
+    showMovieModal(Number(event.target.dataset.id))
+  } else if (event.target.matches('.btn-add-favorite')) {
+    addToFavorite(Number(event.target.dataset.id))
+  }  
+}
+// Add to Favorite
 function addToFavorite(id) {
   // console.log(id)
   const list = JSON.parse(localStorage.getItem('favoriteMovies')) || []
@@ -73,21 +113,19 @@ function addToFavorite(id) {
   localStorage.setItem('favoriteMovies', JSON.stringify(list))
 }
 // Show more info regarding clicked movie
-dataPanel.addEventListener('click', function onPanelClicked(event) {
-  if (event.target.matches('.btn-show-movie')){
-    showMovieModal(Number(event.target.dataset.id))
-  } else if (event.target.matches('.btn-add-favorite')) {
-    addToFavorite(Number(event.target.dataset.id))
-  }  
-})
-// TODO:search based on input  
-
+dataPanel.addEventListener('click', panelClicked)
+// Paginator clicked event
+paginator.addEventListener('click', paginatorClicked)
 // Search feature
-searchForm.addEventListener('click', onSearchFormSubmitted)
+searchForm.addEventListener('click', searchFormSubmitted)
+// TODO:search based on input 
 
 // Send HTTP GET request and get the response through API
-axios.get(INDEX_URL).then((response) => {
+axios.get(INDEX_URL)
+  .then((response) => {
   // use spread operator (...) instead of for-of method
   movies.push(...response.data.results)
-  renderMovieList(movies)
-})
+  renderPaginator(movies.length)
+  renderMovieList(getMoviesByPages(1))
+  })
+  .catch(err => console.log(err))

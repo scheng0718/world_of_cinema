@@ -55,14 +55,15 @@ function removeFromFavorite(id) {
   localStorage.setItem('favoriteMovies', JSON.stringify(movies))
   renderMovieList(movies)
 }
-
-// Show more info regarding clicked movie
-dataPanel.addEventListener('click', function onPanelClicked(event) {
+function panelClicked(event) {
   if (event.target.matches('.btn-show-movie')){
     showMovieModal(Number(event.target.dataset.id))
   } else if (event.target.matches('.btn-remove-favorite')) {
     removeFromFavorite(Number(event.target.dataset.id))
   }  
-})
+}
+
+// Show more info regarding clicked movie
+dataPanel.addEventListener('click', panelClicked)
 
 renderMovieList(movies)
