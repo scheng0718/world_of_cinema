@@ -1,7 +1,7 @@
 const BASE_URL = 'https://webdev.alphacamp.io'
 const INDEX_URL = BASE_URL + '/api/movies/'
 const POSTER_URL = BASE_URL + '/posters/'
-const movies = []
+const movies = JSON.parse(localStorage.getItem('favoriteMovies'))
 const dataPanel = document.querySelector('#data-panel')
 const searchForm = document.querySelector('#search-form')
 const searchInput = document.querySelector('#search-input')
@@ -21,7 +21,7 @@ function renderMovieList(data) {
             </div>
             <div class="card-footer">
               <button class="btn btn-primary btn-show-movie" data-bs-toggle="modal" data-bs-target="#movie-modal" data-id=${item.id}>More</button>
-              <button class="btn btn-info btn-add-favorite" data-id=${item.id}>Add</button>
+              <button class="btn btn-danger btn-remove-favorite" data-id=${item.id}>Remove</button>
             </div>
           </div>
         </div>
@@ -47,47 +47,22 @@ function showMovieModal(id) {
     <img src="${POSTER_URL + data.image}" alt="movie-poster" class="image-fluid">`
   })
 }
-function onSearchFormSubmitted(event) {
-  event.preventDefault()
-  const keywords = searchInput.value.trim().toLowerCase()
-  let filteredMovie = []
-  // Use filter() to filter the movie lists based on input keyword
-  filteredMovie = movies.filter(movie => movie.title.toLowerCase().includes(keywords))
-  if (filteredMovie.length == 0) {
-    alert('Cannot find the movies based on keywords: ' + keywords)
-    renderMovieList(movies)
-  } else {
-    renderMovieList(filteredMovie)
-  }
+function removeFromFavorite(id) {
+  if (!movies || movies.length === 0) return
+  const removedMovieIndex = movies.findIndex(movie => movie.id === id)
+  if (removedMovieIndex === -1) return
+  movies.splice(removedMovieIndex, 1)
+  localStorage.setItem('favoriteMovies', JSON.stringify(movies))
+  renderMovieList(movies)
 }
-function addToFavorite(id) {
-  // console.log(id)
-  const list = JSON.parse(localStorage.getItem('favoriteMovies')) || []
-  const favoriteMovie = movies.find(movie => movie.id === id)
-  // console.log(favoriteMovie)
-  if (list.some(movie => movie.id === id)) {
-    return alert('The movie is already in your favorite list')
-  }
-  list.push(favoriteMovie)
-  // console.log(list)
-  localStorage.setItem('favoriteMovies', JSON.stringify(list))
-}
+
 // Show more info regarding clicked movie
 dataPanel.addEventListener('click', function onPanelClicked(event) {
   if (event.target.matches('.btn-show-movie')){
     showMovieModal(Number(event.target.dataset.id))
-  } else if (event.target.matches('.btn-add-favorite')) {
-    addToFavorite(Number(event.target.dataset.id))
+  } else if (event.target.matches('.btn-remove-favorite')) {
+    removeFromFavorite(Number(event.target.dataset.id))
   }  
 })
-// TODO:search based on input  
 
-// Search feature
-searchForm.addEventListener('click', onSearchFormSubmitted)
-
-// Send HTTP GET request and get the response through API
-axios.get(INDEX_URL).then((response) => {
-  // use spread operator (...) instead of for-of method
-  movies.push(...response.data.results)
-  renderMovieList(movies)
-})
+renderMovieList(movies)
