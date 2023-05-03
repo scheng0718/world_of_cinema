@@ -8,3 +8,10 @@
 #list-mode-button:hover {
   color: #1e90ff;
 }
+
+.card-mode-heart {
+  position: absolute;
+  z-index: 1;
+  bottom: 5%;
+  right: 5%;
+}

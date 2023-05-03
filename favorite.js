@@ -8,8 +8,9 @@ const searchInput = document.querySelector('#search-input')
 
 function renderMovieList(data) {
   let rawHTML = ''
-
+  console.log(data)
   data.forEach(item => {
+    console.log(`${POSTER_URL + item.image}`)
     //title, image
     rawHTML += `
     <div class="col-sm-3">
