@@ -3,13 +3,18 @@ const INDEX_URL = BASE_URL + '/api/movies/'
 const POSTER_URL = BASE_URL + '/posters/'
 const MOVIES_PER_PAGE = 12
 
-const movies = []
-let filteredMovies = []
-
 const dataPanel = document.querySelector('#data-panel')
 const searchForm = document.querySelector('#search-form')
 const searchInput = document.querySelector('#search-input')
 const paginator = document.querySelector('#paginator')
+const listMode = document.querySelector('#list-mode-button')
+const cardMode = document.querySelector('#card-mode-button')
+
+const targetStyle = "color: #1e90ff;"
+const movies = []
+let filteredMovies = []
+let mode = 'card'
+let page = 1
 
 // Render paginator based on movies list
 function renderPaginator(amount) {
@@ -22,27 +27,44 @@ function renderPaginator(amount) {
   paginator.innerHTML = rawHTML
 }
 
-function renderMovieList(data) {
+function renderMovieList(data, mode) {
   let rawHTML = ''
-
   data.forEach(item => {
     //title, image
-    rawHTML += `
-    <div class="col-sm-3">
-        <div class="mb-2">
-          <div class="card" >
-            <img src="${POSTER_URL + item.image}" class="card-img-top" alt="Movie Poster">
-            <div class="card-body">
-              <h5 class="card-title">${item.title}</h5>
-            </div>
-            <div class="card-footer">
-              <button class="btn btn-primary btn-show-movie" data-bs-toggle="modal" data-bs-target="#movie-modal" data-id=${item.id}>More</button>
-              <button class="btn btn-info btn-add-favorite" data-id=${item.id}>Add</button>
+    if (mode === 'card') {
+      rawHTML += `
+        <div class="col-sm-3">
+          <div class="mb-2">
+            <div class="card" >
+              <img src="${POSTER_URL + item.image}" class="card-img-top" alt="Movie Poster">
+              <div class="card-body">
+                <h5 class="card-title">${item.title}</h5>
+              </div>
+              <div class="card-footer">
+                <button class="btn btn-primary btn-show-movie" data-bs-toggle="modal" data-bs-target="#movie-modal" data-id=${item.id}>More</button>
+                <button class="btn btn-info btn-add-favorite" data-id=${item.id}>Add</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    `
+      `
+    } else {
+      rawHTML += `
+        <div class="col-sm-12">
+          <div class="mb-2">
+            <ul class="list-group">
+              <li class="list-group-item d-flex justify-content-between">
+                <h5 class="card-title">${item.title}</h5>
+                <div class="list-button">
+                  <button class="btn btn-primary btn-show-movie" data-bs-toggle="modal" data-bs-target="#movie-modal" data-id=${item.id}>More</button>
+                  <button class="btn btn-info btn-add-favorite" data-id=${item.id}>Add</button>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      `
+    }
   })
   // processing
   dataPanel.innerHTML = rawHTML
@@ -80,17 +102,17 @@ function searchFormSubmitted(event) {
   filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(keywords))
   if (filteredMovies.length === 0) {
     alert('Cannot find the movies based on keywords: ' + keywords)
-    renderMovieList(movies)
+    renderMovieList(movies, mode)
   } else {
     renderPaginator(filteredMovies.length)
-    renderMovieList(getMoviesByPages(1))
+    renderMovieList(getMoviesByPages(1), mode)
   }
 }
 function paginatorClicked(event) {
   if (event.target.tagName !== 'A') return 
-  const page = Number(event.target.dataset.page)
+  page = Number(event.target.dataset.page)
   // console.log(event.target.dataset.page) 
-  renderMovieList(getMoviesByPages(page))
+  renderMovieList(getMoviesByPages(page), mode)
 }
 function panelClicked(event) {
   if (event.target.matches('.btn-show-movie')){
@@ -112,12 +134,29 @@ function addToFavorite(id) {
   // console.log(list)
   localStorage.setItem('favoriteMovies', JSON.stringify(list))
 }
+function changeToListMode(event) {
+  cardMode.removeAttribute('style')
+  listMode.setAttribute('style', targetStyle)
+  mode = 'list'
+  renderMovieList(getMoviesByPages(page), mode)
+}
+function changeToCardMode(event) {
+  listMode.removeAttribute('style')
+  cardMode.setAttribute('style', targetStyle)
+  mode = 'card'
+  renderMovieList(getMoviesByPages(page), mode)
+}
+
 // Show more info regarding clicked movie
 dataPanel.addEventListener('click', panelClicked)
 // Paginator clicked event
 paginator.addEventListener('click', paginatorClicked)
 // Search feature
 searchForm.addEventListener('click', searchFormSubmitted)
+// List Mode
+listMode.addEventListener('click', changeToListMode)
+// Card Mode
+cardMode.addEventListener('click', changeToCardMode)
 // TODO: pagination for favorite page 
 
 // Send HTTP GET request and get the response through API
@@ -126,6 +165,6 @@ axios.get(INDEX_URL)
   // use spread operator (...) instead of for-of method
   movies.push(...response.data.results)
   renderPaginator(movies.length)
-  renderMovieList(getMoviesByPages(1))
+  renderMovieList(getMoviesByPages(1), mode)
   })
   .catch(err => console.log(err))

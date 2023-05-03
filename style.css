@@ -1,0 +1,10 @@
+#change-mode:hover {
+  cursor: pointer;
+ 
+}
+#card-mode-button:hover {
+  color: #1e90ff;
+}
+#list-mode-button:hover {
+  color: #1e90ff;
+}
