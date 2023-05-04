@@ -107,7 +107,7 @@ function renderListMode(rawHTML, item) {
   }
   return rawHTML
 }
-
+// Render the movie list according to the mode
 function renderMovieList(data, mode) {
   let rawHTML = ''
   data.forEach(item => {
@@ -165,11 +165,13 @@ function searchFormSubmitted(event) {
     renderMovieList(getMoviesByPages(1), mode)
   }
 }
+// Display the movie list by different pages
 function paginatorClicked(event) {
   if (event.target.tagName !== 'A') return 
   page = Number(event.target.dataset.page)
   renderMovieList(getMoviesByPages(page), mode)
 }
+// start the event based on the clicked button
 function panelClicked(event) {
   if (event.target.matches('.btn-show-movie')){
     showMovieModal(Number(event.target.dataset.id))
