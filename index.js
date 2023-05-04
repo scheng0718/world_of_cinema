@@ -125,6 +125,7 @@ function renderMovieList(data, mode) {
 function isInFavoriteList(id) {
   const list = JSON.parse(localStorage.getItem('favoriteMovies')) || []
   const favoriteMovie = list.find(movie => movie.id === id)
+  
   return favoriteMovie === undefined ? false : true
 }
 // Determine how many data will be displayed by each page
@@ -171,7 +172,7 @@ function paginatorClicked(event) {
   page = Number(event.target.dataset.page)
   renderMovieList(getMoviesByPages(page), mode)
 }
-// start the event based on the clicked button
+// Start the event based on the clicked button
 function panelClicked(event) {
   if (event.target.matches('.btn-show-movie')){
     showMovieModal(Number(event.target.dataset.id))
@@ -179,14 +180,21 @@ function panelClicked(event) {
     const id = event.target.dataset.id
     const heartIcon = document.querySelector('#heart' + id)
     heartIcon.classList.replace('fa-regular', 'fa-solid')
+    event.target.classList.replace('btn-info','btn-success')
+    event.target.innerText = 'Added'
     addToFavorite(Number(id))
   } else if (event.target.matches('.fa-heart')) {
+    const favoriteButton = event.target.previousElementSibling
     const id = event.target.dataset.id
     if (event.target.matches('.fa-regular')){
       event.target.classList.replace('fa-regular', 'fa-solid')
+      favoriteButton.classList.replace('btn-info','btn-success')
+      favoriteButton.innerText = 'Added'
       addToFavorite(Number(id))
     } else if (event.target.matches('.fa-solid')){
       event.target.classList.replace('fa-solid', 'fa-regular')
+      favoriteButton.classList.replace('btn-success','btn-info')
+      favoriteButton.innerText = 'Add'
       removeFromFavorite(Number(id))
     }
   } 
