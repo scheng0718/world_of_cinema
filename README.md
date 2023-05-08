@@ -2,6 +2,9 @@
 
 World of Cinema is a **web application** that displays a list of movies through API. Users can click on **"More"** to get additional information about each movie. In addition, there are various features such as a movie search function, a **"Add to favorite"** feature, and features to manage the list of favorites. The project is currently being maintained and managed, and several new features have been added.
 
+## Screenshot
+![World of cinema](https://live.staticflickr.com/65535/52882099329_6ee20b524d_b.jpg "This is a screenshot of front page.")
+
 ## Features
 
 * Displays a list of movies through API
